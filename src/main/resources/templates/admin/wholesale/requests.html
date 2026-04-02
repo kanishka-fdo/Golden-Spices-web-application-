@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'Wholesale Requests')}">
+
+<main>
+    <div class="container-fluid">
+
+        <!-- ═══════════════════ HEADER ═══════════════════ -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <div class="section-label">Admin · Wholesale</div>
+                <h2 class="section-heading" style="font-size:1.6rem;">
+                    <i class="bi bi-person-check" style="color:var(--amber);"></i>
+                    Account Requests
+                </h2>
+                <p style="color:var(--text-faint);font-size:.83rem;margin-top:4px;">
+                    Approve or reject wholesale access requests
+                </p>
+            </div>
+            <a th:href="@{/admin/wholesale/dashboard}" class="btn-gs btn-gs-outline">
+                <i class="bi bi-arrow-left"></i> Wholesale Dashboard
+            </a>
+        </div>
+
+        <!-- ═══════════════════ FLASH ═══════════════════ -->
+        <div th:if="${success}" class="gs-alert gs-alert-success mb-3">
+            <i class="bi bi-check-circle-fill"></i>
+            <span th:text="${success}"></span>
+            <button class="gs-alert-close" onclick="this.closest('.gs-alert').remove()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div th:if="${error}" class="gs-alert gs-alert-error mb-3">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${error}"></span>
+            <button class="gs-alert-close" onclick="this.closest('.gs-alert').remove()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <!-- ═══════════════════ REQUESTS TABLE ═══════════════════ -->
+        <div class="gs-panel">
+            <div class="gs-panel-header">
+                <span><i class="bi bi-hourglass-split" style="color:var(--amber);"></i> Pending Requests</span>
+                <span class="gs-badge gs-badge--warning"
+                      th:text="${requests != null ? requests.size() : 0} + ' pending'">0 pending</span>
+            </div>
+            <div class="gs-panel-body">
+
+                <div class="table-responsive"
+                     th:if="${requests != null and !#lists.isEmpty(requests)}">
+                    <table class="gs-table">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Address</th>
+                            <th class="text-end" style="text-align:right;">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="u : ${requests}">
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div class="req-avatar">
+                                        <span th:text="${#strings.substring(u.fullName, 0, 1)}">A</span>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:600;color:var(--text-heading);font-size:.84rem;"
+                                             th:text="${u.fullName}"></div>
+                                        <div style="font-size:.72rem;color:var(--text-faint);">Wholesale Applicant</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="gs-text-faint" th:text="${u.email}"></td>
+                            <td class="gs-text-faint" th:text="${u.phone != null ? u.phone : '—'}"></td>
+                            <td class="gs-text-faint" style="max-width:200px;"
+                                th:text="${u.address != null ? u.address : '—'}"></td>
+                            <td style="text-align:right;">
+                                <div style="display:flex;gap:8px;justify-content:flex-end;">
+                                    <!-- APPROVE -->
+                                    <form th:action="@{/admin/wholesale/{id}/approve(id=${u.id})}"
+                                          method="post" style="display:inline;">
+                                        <button type="submit" class="btn-gs btn-gs-gold"
+                                                style="font-size:.72rem;padding:7px 16px;">
+                                            <i class="bi bi-check-circle"></i> Approve
+                                        </button>
+                                    </form>
+                                    <!-- REJECT -->
+                                    <form th:action="@{/admin/wholesale/{id}/reject(id=${u.id})}"
+                                          method="post" style="display:inline;">
+                                        <button type="submit" class="btn-gs"
+                                                style="font-size:.72rem;padding:7px 16px;
+                                                   background:transparent;color:#c0392b;
+                                                   border:1px solid rgba(192,57,43,.25);border-radius:8px;
+                                                   cursor:pointer;font-family:'Jost',sans-serif;
+                                                   transition:all .2s ease;"
+                                                onmouseover="this.style.background='rgba(192,57,43,.06)'"
+                                                onmouseout="this.style.background='transparent'">
+                                            <i class="bi bi-x-circle"></i> Reject
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="gs-empty-state"
+                     th:if="${requests == null or #lists.isEmpty(requests)}">
+                    <i class="bi bi-inbox"></i>
+                    <p>No pending wholesale requests</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <style>
+        .gs-panel { background:#fff; border:1px solid var(--stone-border); border-radius:12px; box-shadow:var(--shadow-xs); overflow:hidden; }
+        .gs-panel-header {
+            padding:14px 20px; border-bottom:1px solid var(--stone-border); background:var(--stone);
+            font-family:'Cinzel',serif; font-size:.8rem; font-weight:600; letter-spacing:1px;
+            color:var(--text-heading); display:flex; align-items:center; justify-content:space-between;
+        }
+        .gs-panel-body { padding:0; }
+
+        .gs-table { width:100%; border-collapse:collapse; font-size:.83rem; }
+        .gs-table thead tr { border-bottom:1px solid var(--stone-border); }
+        .gs-table thead th {
+            padding:10px 16px; font-size:.66rem; font-weight:600; letter-spacing:1.5px;
+            text-transform:uppercase; color:var(--text-faint); background:var(--stone);
+        }
+        .gs-table tbody tr { border-bottom:1px solid var(--stone-border); transition:background .15s ease; }
+        .gs-table tbody tr:last-child { border-bottom:none; }
+        .gs-table tbody tr:hover { background:rgba(200,132,31,.03); }
+        .gs-table tbody td { padding:14px 16px; vertical-align:middle; }
+        .gs-text-faint { color:var(--text-faint); font-size:.8rem; }
+
+        .gs-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:.67rem; font-weight:600; }
+        .gs-badge--warning { background:rgba(200,132,31,.12); color:var(--amber-dark); border:1px solid rgba(200,132,31,.22); }
+        .gs-badge--success { background:rgba(39,174,96,.10); color:#1a7a46; border:1px solid rgba(39,174,96,.20); }
+
+        .gs-empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:52px 20px; color:var(--text-faint); }
+        .gs-empty-state i { font-size:2.5rem; margin-bottom:12px; opacity:.4; }
+        .gs-empty-state p { font-size:.86rem; margin:0; }
+
+        .req-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--amber-dark), var(--amber));
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-family: 'Cinzel', serif;
+            font-size: .8rem; font-weight: 700; flex-shrink: 0;
+        }
+    </style>
+
+</main>
+</html>

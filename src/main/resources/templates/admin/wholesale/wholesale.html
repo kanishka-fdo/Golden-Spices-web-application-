@@ -1,0 +1,37 @@
+<div class="card shadow-sm border-0 p-5 text-center">
+
+  <h2 class="fw-bold mb-3">Apply for Wholesale Account</h2>
+  <p class="text-muted mb-4">
+    Wholesale customers receive bulk pricing and special payment terms.
+  </p>
+
+  <!-- If NOT requested -->
+  <div th:if="${!user.wholesaleRequested}">
+    <form th:action="@{/wholesale/request}" method="post">
+      <button class="btn btn-warning btn-lg px-5">
+        Request Wholesale Access
+      </button>
+    </form>
+  </div>
+
+  <!-- If requested but not approved -->
+  <div th:if="${user.wholesaleRequested and !user.wholesaleApproved}">
+    <div class="alert alert-warning mt-4">
+      ⏳ Your wholesale request is under review.
+      Admin will approve soon.
+    </div>
+  </div>
+
+  <!-- If approved -->
+  <div th:if="${user.wholesaleApproved}">
+    <div class="alert alert-success mt-4">
+      ✅ Your wholesale account is approved!
+    </div>
+
+    <a th:href="@{/wholesale/products}"
+       class="btn btn-success btn-lg mt-3">
+      View Wholesale Products
+    </a>
+  </div>
+
+</div>

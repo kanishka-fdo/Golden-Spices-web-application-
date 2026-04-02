@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'Wholesale Request')}">
+
+<main>
+    <div class="container py-5">
+
+        <div class="card shadow-lg border-0 p-4 text-center">
+
+            <h3 class="fw-bold mb-3">Apply for Wholesale Account</h3>
+
+            <p class="text-muted">
+                Wholesale customers receive bulk pricing and special payment terms.
+            </p>
+
+            <form th:action="@{/wholesale/request}" method="post">
+                <button class="btn btn-warning btn-lg px-5">
+                    Request Wholesale Access
+                </button>
+            </form>
+
+            <div th:if="${param.success}" class="alert alert-success mt-4">
+                Your request has been submitted. Waiting for admin approval.
+            </div>
+
+        </div>
+
+    </div>
+</main>
+</html>

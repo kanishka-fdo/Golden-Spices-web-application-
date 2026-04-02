@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'Wholesale Admin Dashboard')}">
+
+<main>
+    <div class="container-fluid px-4 py-3">
+
+        <!-- ══════════════════════════════════════════
+             HEADER
+        ══════════════════════════════════════════ -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 style="font-size:1.5rem;font-weight:600;margin:0;">
+                <i class="bi bi-building me-2" style="color:#c8841f;"></i>
+                Wholesale Admin Dashboard
+            </h2>
+            <div style="display:flex;gap:10px;">
+                <a th:href="@{/admin/wholesale/requests}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-person-check me-1"></i> Account Requests
+                    <span th:if="${pendingRequestCount > 0}"
+                          class="badge bg-warning text-dark ms-1"
+                          th:text="${pendingRequestCount}"></span>
+                </a>
+                <a th:href="@{/admin/dashboard}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Admin Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             FLASH MESSAGES
+        ══════════════════════════════════════════ -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             STAT CARDS — ROW 1
+        ══════════════════════════════════════════ -->
+        <div class="row g-3 mb-3">
+
+            <div class="col-md-3">
+                <div class="ws-card">
+                    <div class="ws-card-label">Total Revenue</div>
+                    <div class="ws-card-value" style="color:#c8841f;">
+                        LKR <span th:text="${#numbers.formatDecimal(totalRevenue,0,2)}">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="ws-card">
+                    <div class="ws-card-label">Total Orders</div>
+                    <div class="ws-card-value" th:text="${totalOrders}">0</div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="ws-card">
+                    <div class="ws-card-label">Pending Orders</div>
+                    <div class="ws-card-value" style="color:#e67e22;" th:text="${pendingCount}">0</div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="ws-card" style="cursor:pointer;" onclick="window.location.href='/admin/wholesale/requests'">
+                    <div class="ws-card-label">Account Requests</div>
+                    <div class="ws-card-value" style="color:#e74c3c;" th:text="${pendingRequestCount}">0</div>
+                    <a th:href="@{/admin/wholesale/requests}"
+                       style="font-size:.75rem;color:#c8841f;text-decoration:none;font-weight:500;">
+                        Review →
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             STAT CARDS — ROW 2
+        ══════════════════════════════════════════ -->
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-4">
+                <div class="ws-card">
+                    <div class="ws-card-label">Approved Orders</div>
+                    <div class="ws-card-value" style="color:#27ae60;" th:text="${approvedCount}">0</div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="ws-card">
+                    <div class="ws-card-label">Shipped</div>
+                    <div class="ws-card-value" style="color:#2980b9;" th:text="${shippedCount}">0</div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="ws-card">
+                    <div class="ws-card-label">Approved Accounts</div>
+                    <div class="ws-card-value" style="color:#27ae60;"
+                         th:text="${approvedUsers != null ? approvedUsers.size() : 0}">0</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             ORDERS TABLE + SIDEBAR
+        ══════════════════════════════════════════ -->
+        <div class="row g-4">
+
+            <!-- LEFT: ORDERS TABLE -->
+            <div class="col-lg-8">
+                <div class="ws-panel">
+
+                    <div class="ws-panel-header">
+                        <span><i class="bi bi-list-check me-2"></i>All Wholesale Orders</span>
+                        <span class="badge bg-secondary" th:text="${totalOrders} + ' orders'"></span>
+                    </div>
+
+                    <div th:if="${allOrders != null and !allOrders.isEmpty()}">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" style="font-size:.86rem;">
+                                <thead class="table-light">
+                                <tr>
+                                    <th style="width:40px;">#</th>
+                                    <th>Customer</th>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Payment</th>
+                                    <th style="text-align:right;">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="o, i : ${allOrders}">
+                                    <td class="text-muted" th:text="${i.count}">1</td>
+
+                                    <td th:text="${o.user != null ? o.user.fullName : 'Unknown'}">Customer</td>
+
+                                    <td th:text="${o.product != null ? o.product.name : '—'}">Product</td>
+
+                                    <td th:text="${o.quantity}">0</td>
+
+                                    <td style="color:#c8841f;font-weight:600;">
+                                        LKR <span th:text="${#numbers.formatDecimal(o.totalAmount,0,2)}">0.00</span>
+                                    </td>
+
+                                    <td>
+                                        <span th:if="${o.status == 'PENDING'}"  class="badge bg-warning text-dark">Pending</span>
+                                        <span th:if="${o.status == 'APPROVED'}" class="badge bg-success">Approved</span>
+                                        <span th:if="${o.status == 'SHIPPED'}"  class="badge bg-primary">Shipped</span>
+                                        <span th:if="${o.status != 'PENDING' and o.status != 'APPROVED' and o.status != 'SHIPPED'}"
+                                              class="badge bg-secondary" th:text="${o.status}">Other</span>
+                                    </td>
+
+                                    <td>
+                                        <span th:if="${o.paymentStatus == 'PAID'}"  class="badge bg-success">Paid</span>
+                                        <span th:if="${o.paymentStatus != 'PAID'}"  class="badge bg-secondary">Unpaid</span>
+                                    </td>
+
+                                    <td style="text-align:right;">
+                                        <form th:action="@{/admin/wholesale/orders/{id}/status(id=${o.id})}"
+                                              method="post" class="d-flex align-items-center justify-content-end gap-1">
+                                            <select name="status" class="form-select form-select-sm" style="width:120px;font-size:.78rem;">
+                                                <option value="PENDING"  th:selected="${o.status == 'PENDING'}">Pending</option>
+                                                <option value="APPROVED" th:selected="${o.status == 'APPROVED'}">Approved</option>
+                                                <option value="SHIPPED"  th:selected="${o.status == 'SHIPPED'}">Shipped</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary" title="Update">
+                                                <i class="bi bi-check2"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div th:if="${allOrders == null or allOrders.isEmpty()}"
+                         class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox" style="font-size:2rem;opacity:.3;"></i>
+                        <p class="mt-2 mb-0" style="font-size:.85rem;">No wholesale orders yet</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- RIGHT: SIDEBAR -->
+            <div class="col-lg-4">
+
+                <!-- Pending Requests -->
+                <div class="ws-panel mb-3">
+                    <div class="ws-panel-header">
+                        <span><i class="bi bi-person-exclamation me-2"></i>Pending Requests</span>
+                        <span class="badge bg-warning text-dark"
+                              th:text="${pendingRequestCount} + ' pending'"></span>
+                    </div>
+                    <div class="p-3">
+
+                        <div th:if="${pendingRequests != null and !pendingRequests.isEmpty()}">
+                            <div th:each="u : ${pendingRequests}"
+                                 class="d-flex align-items-center gap-2 py-2 border-bottom">
+                                <div class="ws-avatar">
+                                    <span th:text="${#strings.substring(u.fullName,0,1)}">A</span>
+                                </div>
+                                <div class="flex-grow-1" style="min-width:0;">
+                                    <div style="font-weight:600;font-size:.83rem;" th:text="${u.fullName}"></div>
+                                    <div class="text-muted"
+                                         style="font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                                         th:text="${u.email}"></div>
+                                </div>
+                                <div class="d-flex gap-1">
+                                    <form th:action="@{/admin/wholesale/{id}/approve(id=${u.id})}" method="post">
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Approve">
+                                            <i class="bi bi-check2"></i>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/admin/wholesale/{id}/reject(id=${u.id})}" method="post">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div th:if="${pendingRequests == null or pendingRequests.isEmpty()}"
+                             class="text-center py-3 text-muted">
+                            <i class="bi bi-check2-all" style="font-size:1.5rem;color:#27ae60;opacity:.6;"></i>
+                            <p style="font-size:.8rem;margin:6px 0 0;">No pending requests</p>
+                        </div>
+
+                        <a th:href="@{/admin/wholesale/requests}"
+                           class="btn btn-outline-secondary btn-sm w-100 mt-2">
+                            View All Requests
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Approved Accounts -->
+                <div class="ws-panel mb-3">
+                    <div class="ws-panel-header">
+                        <span><i class="bi bi-people me-2"></i>Approved Accounts</span>
+                        <span class="badge bg-success"
+                              th:text="${approvedUsers != null ? approvedUsers.size() : 0} + ' active'"></span>
+                    </div>
+                    <div class="p-3">
+
+                        <div th:if="${approvedUsers != null and !approvedUsers.isEmpty()}">
+                            <div th:each="u : ${approvedUsers}"
+                                 class="d-flex align-items-center gap-2 py-2 border-bottom">
+                                <div class="ws-avatar" style="background:linear-gradient(135deg,#27ae60,#1a7a46);">
+                                    <span th:text="${#strings.substring(u.fullName,0,1)}">A</span>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div style="font-weight:600;font-size:.83rem;" th:text="${u.fullName}"></div>
+                                    <div class="text-muted" style="font-size:.74rem;" th:text="${u.email}"></div>
+                                </div>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                        </div>
+
+                        <div th:if="${approvedUsers == null or approvedUsers.isEmpty()}"
+                             class="text-center py-3 text-muted">
+                            <i class="bi bi-people" style="font-size:1.5rem;opacity:.3;"></i>
+                            <p style="font-size:.8rem;margin:6px 0 0;">No approved accounts yet</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Wholesale Products -->
+                <div class="ws-panel">
+                    <div class="ws-panel-header">
+                        <span><i class="bi bi-box-seam me-2"></i>Wholesale Products</span>
+                    </div>
+                    <div class="p-3">
+
+                        <div th:if="${products != null and !products.isEmpty()}">
+                            <div th:each="p : ${products}"
+                                 class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                                <div>
+                                    <div style="font-weight:500;font-size:.83rem;" th:text="${p.name}"></div>
+                                    <div style="font-size:.75rem;color:#c8841f;font-weight:600;"
+                                         th:text="'LKR ' + ${#numbers.formatDecimal(p.price,0,2)} + ' / unit'"></div>
+                                </div>
+                                <span class="badge bg-success" th:if="${p.active}">Active</span>
+                                <span class="badge bg-secondary" th:if="${!p.active}">Inactive</span>
+                            </div>
+                        </div>
+
+                        <div th:if="${products == null or products.isEmpty()}"
+                             class="text-center py-3 text-muted">
+                            <i class="bi bi-box" style="font-size:1.5rem;opacity:.3;"></i>
+                            <p style="font-size:.8rem;margin:6px 0 0;">No wholesale products</p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div><!-- /sidebar -->
+        </div><!-- /row -->
+
+    </div>
+
+    <style>
+        .ws-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            height: 100%;
+            transition: box-shadow .2s ease;
+        }
+        .ws-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+        .ws-card-label {
+            font-size: .72rem;
+            font-weight: 600;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            color: #9ca3af;
+        }
+        .ws-card-value {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #111827;
+            line-height: 1.15;
+        }
+
+        .ws-panel {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .ws-panel-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            font-weight: 600;
+            font-size: .84rem;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ws-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #c8841f, #e67e22);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: .75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+    </style>
+
+</main>
+</html>

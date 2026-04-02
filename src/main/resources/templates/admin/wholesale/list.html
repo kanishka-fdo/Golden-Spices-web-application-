@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout/base :: layout(~{::content}, 'Admin Wholesale')">
+
+<div th:fragment="content" class="container py-5">
+
+    <h2>Wholesale Orders (Admin)</h2>
+
+    <table class="table table-bordered mt-4">
+        <tr>
+            <th>Customer</th>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Payment</th>
+            <th>Action</th>
+        </tr>
+
+        <tr th:each="o : ${orders}">
+            <td th:text="${o.user.fullName}"></td>
+            <td th:text="${o.productName}"></td>
+            <td th:text="${o.quantity}"></td>
+            <td th:text="${o.totalAmount}"></td>
+            <td th:text="${o.status}"></td>
+            <td th:text="${o.paymentStatus}"></td>
+            <td>
+                <form th:action="@{/admin/wholesale/{id}/paid(id=${o.id})}" method="post">
+                    <button class="btn btn-success btn-sm">Mark Paid</button>
+                </form>
+            </td>
+        </tr>
+
+    </table>
+
+</div>
+</html>

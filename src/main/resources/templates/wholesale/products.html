@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'Wholesale Products')}">
+
+<main>
+    <div class="container py-4">
+
+        <h2 class="fw-bold mb-4">Wholesale Products</h2>
+
+        <div class="row g-4">
+            <div class="col-md-3" th:each="product : ${products}">
+                <div class="card h-100 shadow-sm">
+
+                    <img th:src="${product.imageUrl}"
+                         class="card-img-top"
+                         alt="Product Image">
+
+                    <div class="card-body">
+
+                        <h5 th:text="${product.name}"></h5>
+
+                        <!-- Wholesale Price -->
+                        <p class="text-success fw-bold"
+                           th:text="'LKR ' + ${product.wholesalePrice}">
+                        </p>
+
+                        <form th:action="@{/wholesale/order}" method="post">
+                            <input type="hidden" name="productId"
+                                   th:value="${product.id}"/>
+
+                            <input type="number"
+                                   name="quantity"
+                                   min="10"
+                                   value="10"
+                                   class="form-control mb-2"/>
+
+                            <button class="btn btn-primary w-100">
+                                Place Bulk Order
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+</html>

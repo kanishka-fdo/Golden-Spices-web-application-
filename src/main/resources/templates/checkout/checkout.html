@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::main}, 'Checkout')}">
+
+<main>
+    <div class="container py-4">
+
+        <h2 class="mb-4"><i class="bi bi-credit-card"></i> Checkout</h2>
+
+        <!-- Flash messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row g-4">
+
+            <!-- LEFT: Checkout Form -->
+            <div class="col-lg-7">
+                <form th:action="@{/checkout/create-order}" method="post">
+
+                    <!-- Customer Information -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0"><i class="bi bi-person me-2"></i>Customer Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Full Name *</label>
+                                <input type="text" name="customerName" class="form-control"
+                                       th:value="${userName}"
+                                       placeholder="Enter your full name"
+                                       required minlength="3" maxlength="100">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Email Address *</label>
+                                    <input type="email" name="customerEmail" class="form-control"
+                                           th:value="${userEmail}"
+                                           placeholder="your@email.com" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Phone Number *</label>
+                                    <input type="tel" name="customerPhone" class="form-control"
+                                           th:value="${userPhone}"
+                                           placeholder="071 857 9984" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Delivery Address *</label>
+                                <textarea name="deliveryAddress" class="form-control" rows="3"
+                                          placeholder="House no, street, city, postal code"
+                                          required th:text="${userAddress}"></textarea>
+                                <small class="text-muted">Please include street, city and postal code</small>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label fw-semibold">Order Notes (Optional)</label>
+                                <textarea name="notes" class="form-control" rows="2"
+                                          placeholder="Any special instructions for delivery?"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0"><i class="bi bi-wallet2 me-2"></i>Payment Method</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-3 p-3 border rounded">
+                                <input class="form-check-input" type="radio" name="paymentMethod"
+                                       id="paymentCOD" value="cod" checked>
+                                <label class="form-check-label w-100" for="paymentCOD">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <strong><i class="bi bi-cash-coin text-success me-1"></i>Cash on Delivery</strong>
+                                            <p class="mb-0 small text-muted">Pay when you receive your order</p>
+                                        </div>
+                                        <i class="bi bi-truck fs-4 text-success"></i>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="form-check p-3 border rounded">
+                                <input class="form-check-input" type="radio" name="paymentMethod"
+                                       id="paymentStripe" value="stripe">
+                                <label class="form-check-label w-100" for="paymentStripe">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <strong><i class="bi bi-credit-card-2-front text-primary me-1"></i>Credit / Debit Card</strong>
+                                            <p class="mb-0 small text-muted">Secure payment via Stripe</p>
+                                        </div>
+                                        <i class="bi bi-shield-check text-success fs-4"></i>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold">
+                        <i class="bi bi-check-circle me-2"></i>Place Order
+                    </button>
+                    <a href="/cart" class="btn btn-outline-secondary w-100 rounded-pill mt-2">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Cart
+                    </a>
+
+                </form>
+            </div>
+
+            <!-- RIGHT: Order Summary -->
+            <div class="col-lg-5">
+                <div class="card shadow sticky-top" style="top:100px;">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Items list — uses CartItemEntity fields -->
+                        <div style="max-height:280px; overflow-y:auto;" class="mb-3">
+                            <div th:each="item : ${items}"
+                                 class="d-flex justify-content-between align-items-start pb-2 mb-2 border-bottom">
+                                <div class="flex-grow-1 pe-2">
+                                    <div class="fw-semibold small"
+                                         th:text="${item.product.brand + ' ' + item.product.name}">
+                                        Product
+                                    </div>
+                                    <small class="text-muted"
+                                           th:text="${item.product.sizeLabel + ' × ' + item.quantity}">
+                                        1kg × 1
+                                    </small>
+                                </div>
+                                <span class="fw-bold small text-danger"
+                                      th:text="'LKR ' + ${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}">
+                                    LKR 0.00
+                                </span>
+                            </div>
+                        </div>
+
+                        <hr class="my-2">
+
+                        <div class="d-flex justify-content-between mb-1 small">
+                            <span>Subtotal</span>
+                            <span th:text="'LKR ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">LKR 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 small">
+                            <span>Delivery</span>
+                            <span class="text-success fw-bold">FREE</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong class="fs-5">Total</strong>
+                            <strong class="fs-4 text-primary"
+                                    th:text="'LKR ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">
+                                LKR 0.00
+                            </strong>
+                        </div>
+
+                        <div class="alert alert-success mb-0 py-2 small">
+                            <i class="bi bi-shield-check me-1"></i>
+                            <strong>100% Secure Checkout</strong><br>
+                            Your information is encrypted and secure.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact card -->
+                <div class="card mt-3 shadow-sm">
+                    <div class="card-body py-3">
+                        <h6 class="mb-2"><i class="bi bi-headset me-1"></i>Need Help?</h6>
+                        <p class="mb-0 small text-muted">
+                            <i class="bi bi-telephone-fill me-1"></i>071 857 9984 / 077 780 8259<br>
+                            <i class="bi bi-clock me-1"></i>Mon–Sat: 8:00 AM – 6:00 PM
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+</html>
